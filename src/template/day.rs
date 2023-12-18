@@ -77,6 +77,10 @@ impl FromStr for Day {
     type Err = DayFromStrError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        #[cfg(feature = "today")]
+        if s == "today" {
+            return Self::today().ok_or(DayFromStrError);
+        }
         let day = s.parse().map_err(|_| DayFromStrError)?;
         Self::new(day).ok_or(DayFromStrError)
     }
@@ -90,7 +94,11 @@ impl Error for DayFromStrError {}
 
 impl Display for DayFromStrError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("expecting a day number between 1 and 25")
+        if cfg!(feature = "today") {
+            f.write_str("expecting a day number between 1 and 25 or 'today'")
+        } else {
+            f.write_str("expecting a day number between 1 and 25")
+        }
     }
 }
 
